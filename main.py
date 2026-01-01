@@ -23,6 +23,14 @@ Build word -> timestamps index
 Search & jump
 Export transcript
 
+
+deactivate
+git rm -r --cached venv
+
+git add .
+git commit -m "Notes"
+git push -u origin main
+
 '''
 
 
@@ -30,6 +38,7 @@ Export transcript
 from fastapi import FastAPI, Request, Form, File, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from vosk import Model, KaldiRecognizer
 import shutil, os, subprocess, wave, json
 from pydub import AudioSegment
@@ -39,6 +48,8 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
@@ -145,7 +156,9 @@ def transcribe_vosk(wav_path):
     final_result = json.loads(recognizer.FinalResult())
     text += final_result.get("text", "")
 
+    
     return text.strip() 
+
 
 
 

@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Transcript</title>
+  <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Video Transcript</h1>
+    <form action="/" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" id="file" accept="video/*" required>
+      <button type="submit">Upload and Transcribe</button>
+    </form>
 
-  <title>FastAPI HTML Test</title>
-  </head>
-
-  
-  <body>
-
-  <form action="/" method="post" enctype="multipart/form-data">
-    <label for="file">Upload Vide:</label>
-    <input type="file" name="file" id="file" accept="video/*" required>
-    <button type="submit">Upload and Transcribe</button>
-  </form>
-
-  <form action="/" method="post">
-    <input type="text" name="url" placeholder="Enter Tiktok Link">
-    <button type="submit">Submit URL</button>
-  </form>
-
-  {% if transcript %}
-  <h3>Transcript:</h3>
-  <p>{{transcript}}</p>
-  {% endif %}
-
-  <p>Count: {{ count }}</p>
-  </body>
+    {% if transcript %}
+    <div class="transcript">
+      <h3>Transcript:</h3>
+      <p>{{ transcript }}</p>
+    </div>
+    {% endif %}
+  </div>
+</body>
 </html>
