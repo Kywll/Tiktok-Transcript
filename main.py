@@ -27,6 +27,8 @@ Export transcript
 deactivate
 git rm -r --cached venv
 
+git add main.py templates/index.html static/
+
 git add .
 git commit -m "Notes"
 git push -u origin main
@@ -87,7 +89,7 @@ async def handle_submission(
         audio_filename = os.path.splitext(file.filename)[0] + ".wav"
         audio_path = os.path.join(UPLOAD_DIR, audio_filename)
         extract_audio(file_path, audio_path)
-
+        
         chunks = split_audio(audio_path, chunk_ms=30000)
 
         full_transcript = ""
