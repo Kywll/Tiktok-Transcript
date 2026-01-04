@@ -92,12 +92,19 @@ async def handle_submission(
         
         chunks = split_audio(audio_path, chunk_ms=30000)
 
-        full_transcript = ""
+        offset = 0.0
+        full_transcript = []
         for chunk_path in chunks:
-            full_transcript += transcribe_vosk(chunk_path) + " "
-        transcript = full_transcript.strip()
+            for w in transcribe_vosk(chunk_path):
+                w["start"] += offset
+                w["end"] += offset
+                full_transcript.append(w)
+            
+            offset += 30.0
+            
+        transcript = full_transcript
 
-        transcript = transcribe_vosk(audio_path)
+        #transcript = transcribe_vosk(audio_path)
 
     else:
         transcript = "No input received"
@@ -143,7 +150,7 @@ def transcribe_vosk(wav_path):
     recognizer = KaldiRecognizer(model, wf.getframerate())
     recognizer.SetWords(True)
 
-    text = ""
+    words_with_timestamps = []
         
     while True:
         data = wf.readframes(16000)
@@ -152,14 +159,16 @@ def transcribe_vosk(wav_path):
             break
         if recognizer.AcceptWaveform(data):
             result = json.loads(recognizer.Result())
-            text += result.get("text", "") + " "
+            if "result" in result:
+                words_with_timestamps.extend(result["result"])
 
 
     final_result = json.loads(recognizer.FinalResult())
-    text += final_result.get("text", "")
-
+    if "result" in final_result:
+        words_with_timestamps.extend(final_result["result"])
     
-    return text.strip() 
+    wf.close()
+    return words_with_timestamps
 
 
 

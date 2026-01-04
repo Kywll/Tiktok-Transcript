@@ -38,8 +38,14 @@
 
     {% if transcript %}
       <h3 style="color: white; text-align: center;">Transcript:</h3>
+      <audio src="audioPlayer" controls>
+        <source src="/uploads/snaptik_7270571783743474945_v2_chunk0.wav" type="audio/wav">
+        Your browser does not support the audio element.
+      </audio>
       <div class="container rounded bg-primary text-white p-4 text-center">
-      <p>{{ transcript }}</p>
+        {% for word in transcript%}
+          <span class="me-1">{{word.word}}</span>
+        {% endfor %}
     
     {% endif %}
     </div>
