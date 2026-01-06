@@ -41,18 +41,34 @@
 
       {% if audio_file %}
       <div class="text-center mt-3">
-      <audio controls>
+      <audio id="player" controls>
         <source src="/uploads/{{ audio_file }}" type="audio/wav">
         Your browser does not support the audio element.
       </audio>
       </div>
       {% endif %}
-
-      <div class="container rounded bg-primary text-white p-4 text-center">
+      
+      <div id="transcript" class="container rounded bg-primary text-white p-4 text-center">
         {% for word in transcript%}
-          <span class="me-1">{{word.word}}</span>
+          <span class="word me-1" data-index="{{ loop.index0 }}">{{word.word}}</span>
         {% endfor %}
       </div>
+
+      <script>
+        const audio = document.getElementById("player")
+        const transcript = {{ transcript | tojson }};
+
+        document.getElementById("transcript").addEventListener("click", (e) => {
+          if (!e.target.classList.contains("word")) return;
+          
+          const index = Number(e.target.dataset.index);
+          const word = transcript[index];
+
+          audio.currentTime = word.start;
+          audio.play();
+          
+        });
+      </script>
     {% endif %}
       
 
