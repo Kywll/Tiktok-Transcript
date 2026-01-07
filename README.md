@@ -45,14 +45,14 @@ http://127.0.0.1:8000
 Upload a video file to generate the transcript. Click words to jump to their timestamps or search for specific words to highlight them.
 Project Structure
 .
-├── main.py             # FastAPI application
+├── main.py
 ├── templates/
-│   └── index.html      # Frontend HTML
+│   └── index.html
 ├── static/
-│   └── index.css       # CSS for styling
-├── uploads/            # Uploaded videos and audio files
-├── model/              # Vosk model
-└── requirements.txt    # Python dependencies
+│   └── index.css
+├── uploads/
+├── model/
+└── requirements.txt
 
 Learning Outcomes:
 This project has been a great way to practice:
