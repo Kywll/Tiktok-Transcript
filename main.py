@@ -104,6 +104,13 @@ async def handle_submission(
             
         transcript = full_transcript
 
+        word_indexes = {}
+        for idx, word_obj in enumerate(transcript):
+            w = word_obj["word"].lower().strip(".,!?'")
+            if w not in word_indexes:
+                word_indexes[w] = []
+            word_indexes[w].append(idx)
+
         #transcript = transcribe_vosk(audio_path)
 
     else:
@@ -117,7 +124,8 @@ async def handle_submission(
             "count": 5,
             "submitted_url": url,
             "uploaded_file": file.filename if file else None,
-            "audio_file": audio_filename
+            "audio_file": audio_filename,
+            "word_indexes": word_indexes
             
         }
     )

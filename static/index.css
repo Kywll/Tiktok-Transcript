@@ -13,3 +13,8 @@
   .word:active {
     background-color: rgba(255, 255, 255, 0.4);
   }
+
+  .audio-player {
+    width: 450px; /* adjust to whatever fits your layout */
+    height: 35px;  /* optional, controls player height slightly */
+}

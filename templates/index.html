@@ -30,17 +30,15 @@
     </button>
   </div>
 </form>
-
-  </div>
-
   <br>
-
+  </div>
+  <br>
     {% if transcript %}
       <h3 style="color: white; text-align: center;">Transcript:</h3>
 
       {% if audio_file %}
       <div class="text-center mt-3">
-      <audio id="player" controls>
+      <audio id="player" class="audio-player" controls>
         <source src="/uploads/{{ audio_file }}" type="audio/wav">
         Your browser does not support the audio element.
       </audio>
@@ -52,10 +50,18 @@
           <span class="word me-1" data-index="{{ loop.index0 }}">{{word.word}}</span>
         {% endfor %}
       </div>
+      
+      <div class="text-center text-white">
+        <form action="">
+          <input type="text" id="word_search" placeholder="Enter Word">
+          <button type="button" onclick="highlightWords()">Search Word</button>
+        </form>
+      </div>
 
       <script>
         const audio = document.getElementById("player")
         const transcript = {{ transcript | tojson }};
+        const word_indexes = {{ word_indexes | default({}) | tojson}};
 
         document.getElementById("transcript").addEventListener("click", (e) => {
           if (!e.target.classList.contains("word")) return;
@@ -65,8 +71,36 @@
 
           audio.currentTime = word.start;
           audio.play();
-          
         });
+
+
+        let highlightedIndexes = []
+        function highlightWords(){
+          const wordInput = document.getElementById("word_search").value.toLowerCase().trim();
+
+          highlightedIndexes.forEach(idx => {
+              const span = document.querySelector(`#transcript span.word[data-index="${idx}"]`);
+              if(span) span.style.backgroundColor = "";
+          });
+
+          highlightedIndexes = [];
+
+          if (wordInput in word_indexes){
+            const indexes = word_indexes[wordInput]
+
+            indexes.forEach(idx => {
+              const span = document.querySelector(`#transcript span.word[data-index="${idx}"]`);
+              if(span) {
+                span.style.backgroundColor = "yellow";
+                highlightedIndexes.push(idx)
+              }
+            });
+          }
+          else{
+            console.log("Word not found")
+          }
+        }
+
       </script>
     {% endif %}
       
