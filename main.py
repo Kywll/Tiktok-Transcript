@@ -44,6 +44,7 @@ from fastapi.staticfiles import StaticFiles
 from vosk import Model, KaldiRecognizer
 import shutil, os, subprocess, wave, json
 from pydub import AudioSegment
+import heapq
 
 model = Model("model")
 UPLOAD_DIR = "uploads"
@@ -103,13 +104,27 @@ async def handle_submission(
             offset += 30.0
             
         transcript = full_transcript
-
         word_indexes = {}
         for idx, word_obj in enumerate(transcript):
             w = word_obj["word"].lower().strip(".,!?'")
             if w not in word_indexes:
                 word_indexes[w] = []
             word_indexes[w].append(idx)
+        
+        '''
+            TO BE FIXED
+        '''
+        
+        freq = []
+        for w in word_indexes:
+            pair = (-len(word_indexes[w]), w)
+            heapq.heappush(freq, pair)
+        
+        word_frquencies = []
+        for i in range(10):
+            word_frquencies.append(heapq.heappop(freq))
+
+        
 
         #transcript = transcribe_vosk(audio_path)
 
@@ -125,7 +140,8 @@ async def handle_submission(
             "submitted_url": url,
             "uploaded_file": file.filename if file else None,
             "audio_file": audio_filename,
-            "word_indexes": word_indexes
+            "word_indexes": word_indexes,
+            "word_frequencies": word_frquencies
             
         }
     )
