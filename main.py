@@ -5,7 +5,8 @@ from vosk import Model, KaldiRecognizer
 from pydub import AudioSegment
 
 import shutil, os, subprocess, wave
-import json, heapq 
+import json
+import heapq 
 
 model = Model("model")
 
@@ -164,5 +165,7 @@ git add main.py templates/index.html static/
 git add .
 git commit -m "Notes"
 git push -u origin main
+
+
 
 '''
