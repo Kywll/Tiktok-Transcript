@@ -1,151 +1,76 @@
-'''
-cd "D:\MJ\Coding\Resume Projects/Tiktok Transcript"
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-
-.\venv\Scripts\activate
-
-python -m uvicorn main:app --reload
-
-http://127.0.0.1:8000
-
-Ctrl + Shift + P
-Python: Select Interpreter
-
-Python + FastAPI + FFmpeg + Whisper + Vanilla JS
-
-
---- MVP GOAL (Reminder) ---
-Paste TikTok URL
-Decode audio
-Transcribe with timestamps
-Build word -> timestamps index
-Search & jump
-Export transcript
-
-
-deactivate
-git rm -r --cached venv
-
-git add main.py templates/index.html static/
-
-git add .
-git commit -m "Notes"
-git push -u origin main
-
-'''
-
-
-
-from fastapi import FastAPI, Request, Form, File, UploadFile
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from vosk import Model, KaldiRecognizer
-import shutil, os, subprocess, wave, json
 from pydub import AudioSegment
-import heapq
+
+import shutil, os, subprocess, wave
+import json, heapq 
 
 model = Model("model")
+
 UPLOAD_DIR = "uploads"
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-templates = Jinja2Templates(directory="templates")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "transcript": "This is the transcript",
-            "count": 5
-        }
-    )
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
-@app.post("/", response_class=HTMLResponse)
+@app.post("/transcribe")
+async def transcribe_video(file: UploadFile = File(...)):
+    video_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(video_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
 
-async def handle_submission(
-    request: Request,
-    url: str = Form(None),
-    file: UploadFile = File(None)
+    audio_filename = os.path.splitext(file.filename)[0] + ".wav"
+    audio_path = os.path.join(UPLOAD_DIR, audio_filename)
+    extract_audio(video_path, audio_path)
 
-):
+    chunks = split_audio(audio_path, chunk_ms=30000)
 
-    transcript = ""
-    if url:
-        print("User submitted URL:", url)
-        transcript = f"Transcript for: {url}"
+    transcript = []
+    offset = 0.0
 
-    elif file:
-        print("User uploaded:", file.filename)
-        file_path = os.path.join(UPLOAD_DIR, file.filename)
-        with open(file_path, "wb") as f:
-            shutil.copyfileobj(file.file, f)
-
-        audio_filename = os.path.splitext(file.filename)[0] + ".wav"
-        audio_path = os.path.join(UPLOAD_DIR, audio_filename)
-        extract_audio(file_path, audio_path)
+    for chunk_path in chunks:
+        for w in transcribe_vosk(chunk_path):
+            w["start"] += offset
+            w["end"] += offset
+            transcript.append(w)
         
-        chunks = split_audio(audio_path, chunk_ms=30000)
+        offset += 30.0
 
-        offset = 0.0
-        full_transcript = []
-        for chunk_path in chunks:
-            for w in transcribe_vosk(chunk_path):
-                w["start"] += offset
-                w["end"] += offset
-                full_transcript.append(w)
-            
-            offset += 30.0
-            
-        transcript = full_transcript
-        word_indexes = {}
-        for idx, word_obj in enumerate(transcript):
-            w = word_obj["word"].lower().strip(".,!?'")
-            if w not in word_indexes:
-                word_indexes[w] = []
-            word_indexes[w].append(idx)
+    word_indexes = {}
+    for idx, word_obj in enumerate(transcript):
+        w = word_obj["word"].lower().strip(".,!?'")
+        if w not in word_indexes:
+            word_indexes[w] = []
+        word_indexes[w].append(idx)
+
+    freq = []
+    for w in word_indexes:
+        pair = (-len(word_indexes[w]), w)
+        heapq.heappush(freq, pair)
+    
+    word_frequencies = []
+    for i in range(10):
+        word_frequencies.append(heapq.heappop(freq))
+
+    return {
+        "audio_file": audio_filename,
+        "transcript": transcript,
+        "word_indexes": word_indexes,
+        "word_frequencies": word_frequencies
         
-        '''
-            TO BE FIXED
-        '''
-        
-        freq = []
-        for w in word_indexes:
-            pair = (-len(word_indexes[w]), w)
-            heapq.heappush(freq, pair)
-        
-        word_frquencies = []
-        for i in range(10):
-            word_frquencies.append(heapq.heappop(freq))
-
-        
-
-        #transcript = transcribe_vosk(audio_path)
-
-    else:
-        transcript = "No input received"
-
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "transcript": transcript,
-            "count": 5,
-            "submitted_url": url,
-            "uploaded_file": file.filename if file else None,
-            "audio_file": audio_filename,
-            "word_indexes": word_indexes,
-            "word_frequencies": word_frquencies
-            
-        }
-    )
-
+    }
 
 def extract_audio(video_path, output_path):
     command = [
@@ -157,7 +82,12 @@ def extract_audio(video_path, output_path):
         "-af", "afftdn",
         output_path
     ]
-    subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check = True)
+    subprocess.run(
+        command, 
+        stdout=subprocess.PIPE, 
+        stderr=subprocess.PIPE, 
+        check = True
+        )
 
 def split_audio(wav_path, chunk_ms=30000):
     audio = AudioSegment.from_wav(wav_path)
@@ -183,6 +113,7 @@ def transcribe_vosk(wav_path):
 
         if len(data) == 0:
             break
+
         if recognizer.AcceptWaveform(data):
             result = json.loads(recognizer.Result())
             if "result" in result:
@@ -197,11 +128,41 @@ def transcribe_vosk(wav_path):
     return words_with_timestamps
 
 
+'''
+cd "D:\MJ\Coding\Resume Projects/Tiktok Transcript"
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+.\venv\Scripts\activate
+
+python -m uvicorn main:app --reload
+
+http://127.0.0.1:8000
+
+Ctrl + Shift + P
+Python: Select Interpreter
+
+npm run dev
+
+Python + FastAPI + FFmpeg + Whisper + Vanilla JS
 
 
+--- MVP GOAL (Reminder) ---
+Paste TikTok URL
+Decode audio
+Transcribe with timestamps
+Build word -> timestamps index
+Search & jump
+Export transcript
 
 
+deactivate
+git rm -r --cached venv
 
+git add main.py templates/index.html static/
 
+git add .
+git commit -m "Notes"
+git push -u origin main
 
-
+'''
