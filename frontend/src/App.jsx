@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 function App() {
   const [file, setFile] = useState(null);
   const [transcript, setTranscript] = useState(null);
+  const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const audioRef = useRef(null);
 
   const handleUpload = async () => {
     if (!file) return;
@@ -27,15 +30,23 @@ function App() {
       }
 
       const data = await res.json();
+      setTranscript(data.transcript);
+      setAudioFile(
+        `http://127.0.0.1:8000/uploads/${data.audio_file}`
+      );
 
-      const text = data.transcript
-        .map(w => w.word)
-        .join(" ");
-      setTranscript(text);
     } catch(err) {
       setError(err.message);
-    } setLoading(false);
+    } finally {
+        setLoading(false);
+    }
+  };
 
+  const jumpTo = (time) => {
+    if(audioRef.current) {
+      audioRef.current.currentTime = time;
+      audioRef.current.play();
+    }
   };
 
 
@@ -59,10 +70,27 @@ function App() {
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       
+      {audioFile && (
+        <>
+          <h2>Audio</h2>
+          <audio ref={audioRef} controls src={audioFile} />
+        </>
+      )}
+
       {transcript && (
         <>
-          <h2>Transcript</h2>
-          <p style={{ whiteSpace: "pre-wrap" }}>{transcript}</p>
+          <h2>Transcript (click a word)</h2>
+          <p style={{ lineHeight: "1.8" }}>
+            {transcript.map((w, i) => (
+              <span
+                key={i}
+                onClick={() => jumpTo(w.start)}
+                style= {{ cursor: "pointer", marginRight: "4px" }}
+              >
+                {w.word}
+              </span>
+            ))}
+            </p>
         </>
 
       )}
