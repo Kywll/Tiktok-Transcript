@@ -12,7 +12,7 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
                 <h2>Transcript</h2>
                 <small style={{ color: "#666" }}>Tip: Alt + Click to Mute/Unmute</small>
             </div>
-            
+
             <input 
                 type="text" 
                 placeholder="Search word..."
@@ -21,7 +21,16 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
                 style={{ marginBottom: "1rem", padding: "0.5rem" }}
             />
             
-            <p style={{ lineHeight: "1.8", maxWidth: "100%", whiteSpace: "normal" }}>
+                <div
+                    className="p-3 rounded"
+                    style={{
+                        border: "2px solid #2a2f3a",
+                        borderRadius: "10px",
+                        backgroundColor: "#0b0e14",
+                        lineHeight: "1.9",
+                        fontSize: "1.15rem",
+                    }}
+                >
                 {transcript.map((w, i) => {
                     const normalizedWord = w.word.toLowerCase().replace(/[\.,!?']/g, "");
                     const isSearchMatch = searchWord && normalizedWord.includes(searchWord);
@@ -64,7 +73,7 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
                         </span>
                     );
                 })}
-            </p>
+            </div>
         </>
     );
 }

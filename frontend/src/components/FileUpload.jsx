@@ -3,6 +3,7 @@ function FileUpload({ onFileSelect, onUpload, loading, disabled }) {
         <>
             <input 
                 type="file" 
+                className="form-control"
                 accept="video/*"
                 onChange={(e) => onFileSelect(e.target.files[0])}
             />

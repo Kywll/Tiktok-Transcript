@@ -99,45 +99,66 @@ function App() {
 
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>Video Transcriber</h1>
+    <div className="container py-5">
+      <div className="row justify-content-center">
+        <div className="col-lg-9 col-xl-8">
 
-      <FileUpload
-        onFileSelect={setFile}
-        onUpload={handleUpload}
-        loading={loading}
-        disabled={!file}
-      />
+          <h1 className="text-center mb-4 fw-semibold">
+            Video Transcriber & Editing
+          </h1>
+          <p className="text-center text-secondary mb-4">
+            Upload a video, search words, mute moments, export a clean cut
+          </p>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          <div className="card shadow-sm mb-4">
+            <div className="card-body">
+              <FileUpload
+                onFileSelect={setFile}
+                onUpload={handleUpload}
+                loading={loading}
+                disabled={!file}
+              />
 
-      <AudioPlayer 
-        ref={audioRef} 
-        controls
-        src={audioFile} 
-        onTimeUpdate={(e) => setCurrentTime(e.target.currentTime)}
-      />
+              {error && (
+                <div className="alert alert-danger mt-3">
+                  {error}
+                </div>
+              )}
+            </div>
+          </div>
 
-      <Transcript 
-        transcript={transcript}
-        onWordClick={jumpTo} 
-        currentTime={currentTime}
-        mutedIndexes={mutedIndexes}
-        onToggleMute={toggleMute}
-      />
+          <AudioPlayer
+            ref={audioRef}
+            src={audioFile}
+            onTimeUpdate={(e) => setCurrentTime(e.target.currentTime)}
+          />
 
-      {transcript && (
-        <button
-          onClick={handleExportVideo}
-          disabled={loading}
-          style={{ marginLeft: "10px", backgroundColor: "green", color: "white" }}
-        >
-          {loading ? "Processing..." : "Export Edited Video"}
-        </button>
-      )}
+          <Transcript
+            transcript={transcript}
+            onWordClick={jumpTo}
+            currentTime={currentTime}
+            mutedIndexes={mutedIndexes}
+            onToggleMute={toggleMute}
+          />
 
+          {transcript && (
+            <div className="d-flex justify-content-end mt-4">
+              <button
+                className="btn btn-success px-4"
+                onClick={handleExportVideo}
+                disabled={loading}
+              >
+                {loading ? "Processing..." : "Export Edited Video"}
+              </button>
+            </div>
+          )}
+
+        </div>
+      </div>
     </div>
   );
+
+
 }
 
 export default App;
