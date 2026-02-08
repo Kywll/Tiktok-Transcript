@@ -1,15 +1,18 @@
 import { useState } from "react";
 
-function Transcript({ transcript, onWordClick, currentTime }) {
+function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onToggleMute }) {
     const [searchWord, setSearchWord] = useState("");
-    // Track which word index is being hovered
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     if (!transcript) return null;
 
     return (
         <>
-            <h2>Transcript (click a word)</h2>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2>Transcript</h2>
+                <small style={{ color: "#666" }}>Tip: Alt + Click to Mute/Unmute</small>
+            </div>
+            
             <input 
                 type="text" 
                 placeholder="Search word..."
@@ -27,16 +30,26 @@ function Transcript({ transcript, onWordClick, currentTime }) {
                     const isCurrentWord = currentTime >= w.start && currentTime <= w.end;
                     const isHovered = hoveredIndex === i;
 
+                    const isMuted = mutedIndexes.includes(i)
+
                     // Determine background color priority
                     let backgroundColor = "transparent";
                     if (isSearchMatch) backgroundColor = "yellow";
                     if (isHovered) backgroundColor = "lightblue";
+                    if (isMuted) backgroundColor = "red"
                     if (isCurrentWord) backgroundColor = "orange";
-
+                    
                     return (
                         <span
+                            onClick={(e) => {
+                                if (e.altKey) {
+                                    e.preventDefault();
+                                    onToggleMute(i);
+                                } else {
+                                    onWordClick(w.start);
+                                }
+                            }}
                             key={i}
-                            onClick={() => onWordClick(w.start)}
                             onMouseEnter={() => setHoveredIndex(i)}
                             onMouseLeave={() => setHoveredIndex(null)}
                             style={{
@@ -44,7 +57,6 @@ function Transcript({ transcript, onWordClick, currentTime }) {
                                 marginRight: "4px",
                                 borderRadius: "2px",
                                 backgroundColor: backgroundColor,
-                                // Transition makes the color change smooth
                                 transition: "background-color 0.2s ease" 
                             }}                        
                         >

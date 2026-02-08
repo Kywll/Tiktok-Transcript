@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { transcribeVideo } from "./api/transcribe";
 
 import FileUpload from "./components/FileUpload";
@@ -13,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [mutedIndexes, setMutedIndexes] = useState([]);
 
   const audioRef = useRef(null);
 
@@ -44,6 +45,26 @@ function App() {
     }
   };
 
+  const toggleMute = (index) => {
+    setMutedIndexes((prev) =>
+      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    );
+  }
+
+  useEffect(() => {
+    if (!audioRef.current || !transcript) return;
+
+    const isMuted = transcript.some((w, i) => {
+      return currentTime >= (w.start -0.1) && currentTime <= (w.end -0.1) && mutedIndexes.includes(i);
+    });
+
+    audioRef.current.muted = isMuted;
+
+  }, [currentTime, mutedIndexes, transcript]);
+
+
+
+
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>Video Transcriber</h1>
@@ -68,7 +89,11 @@ function App() {
         transcript={transcript}
         onWordClick={jumpTo} 
         currentTime={currentTime}
+        mutedIndexes={mutedIndexes}
+        onToggleMute={toggleMute}
       />
+
+
 
     </div>
   );
