@@ -85,7 +85,7 @@ function App() {
       const data = await res.json();
 
       if (data.filename) {
-        window.location.href = `http://127.0.0.1:8000/download/${data.filename}`;
+        window.location.href = `${import.meta.env.VITE_API_URL}/download/${data.filename}`;
       } else {
         throw new Error("No filename received from server")
       }
