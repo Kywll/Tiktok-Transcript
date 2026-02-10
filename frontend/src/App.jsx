@@ -73,7 +73,7 @@ function App() {
     }));
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/export-video", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/export-video`, {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify({

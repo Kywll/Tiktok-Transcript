@@ -9,3 +9,4 @@ uploads/
 downloads/
 
 .git/
+frontend/.env
