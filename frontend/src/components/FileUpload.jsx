@@ -1,18 +1,24 @@
 function FileUpload({ onFileSelect, onUpload, loading, disabled }) {
     return (
-        <>
-            <input 
-                type="file" 
-                className="form-control"
-                accept="video/*"
-                onChange={(e) => onFileSelect(e.target.files[0])}
-            />
-            <br /><br />
-
-            <button onClick={onUpload} disabled={loading || disabled}>
+        <div className="text-center">
+            <div className="mb-3">
+                <input 
+                    type="file" 
+                    className="form-control mb-3"
+                    accept="video/*"
+                    onChange={(e) => onFileSelect(e.target.files[0])}
+                    style={{ maxWidth: "400px", margin: "0 auto" }}
+                />
+            </div>
+            
+            <button
+                onClick={onUpload} 
+                disabled={loading || disabled}
+                className="btn btn-primary px-4"
+            >
                 {loading ? "Transcribing..." : "Upload & Transcribe"}
             </button>
-        </>
+        </div>
     );
 }
 

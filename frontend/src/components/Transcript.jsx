@@ -10,9 +10,10 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
     if (!transcript) return null;
 
     return (
-        <>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h2>Transcript</h2>
+        <div className="mt-4 text-center">
+            <div className="text-center mb-2">
+                <h3 className="fw-semibold mb-2">Transcript</h3>
+                
                 <small style={{ color: "#666" }}>
                     Tip: Alt + Click (Desktop) or Long Press (Mobile) to Mute/Unmute
                 </small>
@@ -23,17 +24,18 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
                 placeholder="Search word..."
                 value={searchWord}
                 onChange={(e) => setSearchWord(e.target.value.toLowerCase())}
-                style={{ marginBottom: "1rem", padding: "0.5rem" }}
+                style={{ marginBottom: "1rem", padding: "0.5rem"}}
             />
-            
                 <div
-                    className="p-3 rounded"
+                    className="p-3 rounded mx-auto"
                     style={{
                         border: "2px solid #2a2f3a",
                         borderRadius: "10px",
                         backgroundColor: "#0b0e14",
                         lineHeight: "1.9",
                         fontSize: "1.15rem",
+                        maxWidth: "700px",
+                        textAlign: "center"
                     }}
                 >
                 {transcript.map((w, i) => {
@@ -91,7 +93,7 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
                     );
                 })}
             </div>
-        </>
+        </div>
     );
 }
 

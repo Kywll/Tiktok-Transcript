@@ -101,21 +101,24 @@ function App() {
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
-        <div className="col-lg-9 col-xl-8">
+        <div className="col-lg-10 col-xl-9">
 
-          <h1 className="text-center mb-4 fw-semibold">
-            Video Transcriber & Editing
-          </h1>
-          <p className="text-center text-secondary mb-4">
-            Upload a video, search words, mute moments, export a clean cut
-          </p>
+          <div className="text-center mb-5">
+            <h1 className="fw-bold mb-3">
+              Video Transcriber & Editing
+            </h1>
 
-          <p className="text-center text-warning small">
-            ⚠️ Note: Large or long videos may take longer to process and could fail due to server limitations.
-          </p>
+            <p className="text-secondary fs-5">
+              Upload a video, search words, mute moments, export a clean cut
+            </p>
+
+            <p className="text-warning small mt-3">
+              ⚠️ Large or long videos may take longer to process and could fail due to server limitations.
+            </p>
+          </div>
           
-          <div className="card shadow-sm mb-4">
-            <div className="card-body">
+          <div className="card shadow-sm mb-">
+            <div className="card-body py-4">
               <FileUpload
                 onFileSelect={setFile}
                 onUpload={handleUpload}
@@ -146,7 +149,7 @@ function App() {
           />
 
           {transcript && (
-            <div className="d-flex justify-content-end mt-4">
+            <div className="text-center mt-4">
               <button
                 className="btn btn-success px-4"
                 onClick={handleExportVideo}
