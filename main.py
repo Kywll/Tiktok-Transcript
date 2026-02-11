@@ -55,7 +55,7 @@ async def transcribe_video(file: UploadFile = File(...)):
             w["end"] += offset
             transcript.append(w)
         
-        offset += 30.0
+        offset += 10.0
 
     word_indexes = {}
     for idx, word_obj in enumerate(transcript):
