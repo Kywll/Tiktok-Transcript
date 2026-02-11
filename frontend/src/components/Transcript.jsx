@@ -4,13 +4,17 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
     const [searchWord, setSearchWord] = useState("");
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
+    const holdTimeout = useRef(null);
+
     if (!transcript) return null;
 
     return (
         <>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h2>Transcript</h2>
-                <small style={{ color: "#666" }}>Tip: Alt + Click to Mute/Unmute</small>
+                <small style={{ color: "#666" }}>
+                    Tip: Alt + Click (Desktop) or Long Press (Mobile) to Mute/Unmute
+                </small>
             </div>
 
             <input 
@@ -51,12 +55,17 @@ function Transcript({ transcript, onWordClick, currentTime, mutedIndexes, onTogg
                     return (
                         <span
                             onClick={(e) => {
-                                if (e.altKey) {
-                                    e.preventDefault();
-                                    onToggleMute(i);
-                                } else {
+                                if (!e.altKey) {
                                     onWordClick(w.start);
                                 }
+                            }}
+                            onTouchStart={() => {
+                                holdTimeout.current = setTimeout(() => {
+                                    onToggleMute(i);
+                                }, 500);
+                            }}
+                            onTouchEnd={() => {
+                                clearTimeout(holdTimeout.current);
                             }}
                             key={i}
                             onMouseEnter={() => setHoveredIndex(i)}

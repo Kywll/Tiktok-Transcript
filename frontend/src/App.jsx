@@ -29,7 +29,7 @@ function App() {
       setTranscript(data.transcript);
       setWordIndexes(data.word_indexes);
       setAudioFile(
-        `http://127.0.0.1:8000/uploads/${data.audio_file}`
+        `${import.meta.env.VITE_API_URL}/uploads/${data.audio_file}`
       );
     } catch (err) {
       setError(err.message);
@@ -110,6 +110,10 @@ function App() {
             Upload a video, search words, mute moments, export a clean cut
           </p>
 
+          <p className="text-center text-warning small">
+            ⚠️ Note: Large or long videos may take longer to process and could fail due to server limitations.
+          </p>
+          
           <div className="card shadow-sm mb-4">
             <div className="card-body">
               <FileUpload
